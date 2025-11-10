@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📢 Promote Your Content | Lightbringer</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h2>📢 Promote Your Content</h2>
+      <p class="subtitle">Get your link featured on the faucet homepage</p>
+    </header>
+
+    <div class="promo-info">
+      <p>💡 Your ad will be randomly displayed to faucet users</p>
+      <p>💰 Cost: <%= promoCost %> satoshi (coming soon)</p>
+    </div>
+
+    <div class="claim-box">
+      <form id="promoForm">
+        <input 
+          type="text" 
+          name="title" 
+          placeholder="Ad Title (e.g., 'Visit My Website')" 
+          required
+          maxlength="100"
+        >
+        <input 
+          type="url" 
+          name="url" 
+          placeholder="Target URL (e.g., https://example.com)" 
+          required
+        >
+        <button type="submit" class="btn-claim">📤 Submit Ad</button>
+      </form>
+      <p id="result" class="result-message"></p>
+    </div>
+
+    <div class="nav-links">
+      <a href="/" class="link">← Back to Faucet</a>
+    </div>
+
+    <footer>
+      <small>⚡ Powered by Lightbringer</small>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('promoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const resultEl = document.getElementById('result');
+      const submitBtn = e.target.querySelector('button');
+      
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Submitting...';
+      resultEl.textContent = '';
+      
+      try {
+        const response = await fetch('/promote', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams(formData)
+        });
+        
+        const data = await response.json();
+        resultEl.textContent = data.message;
+        
+        // Add success/error class
+        if (data.message.includes('✅')) {
+          resultEl.className = 'result-message success';
+          e.target.reset();
+        } else {
+          resultEl.className = 'result-message error';
+        }
+      } catch (error) {
+        resultEl.textContent = '❌ Network error. Please try again.';
+        resultEl.className = 'result-message error';
+      } finally {
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📤 Submit Ad';
+      }
+    });
+  </script>
+</body>
+</html>

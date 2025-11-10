@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💧 Lightbringer Faucet</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>💧 Lightbringer Faucet</h1>
+      <p class="subtitle">Claim <%= rewardSat %> satoshi every <%= cooldownMin %> minutes</p>
+    </header>
+
+    <!-- Google AdSense -->
+    <% if (adsenseClient && adsenseSlot) { %>
+    <div class="adsense-container">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="<%= adsenseClient %>"
+           data-ad-slot="<%= adsenseSlot %>"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
+    <% } %>
+
+    <!-- Claim Form -->
+    <div class="claim-box">
+      <form id="claimForm">
+        <input 
+          type="text" 
+          id="fp_to" 
+          name="fp_to" 
+          placeholder="Enter FaucetPay username or BTC wallet" 
+          required
+        >
+        <button type="submit" class="btn-claim">🎁 Claim Reward</button>
+      </form>
+      <p id="result" class="result-message"></p>
+    </div>
+
+    <!-- User Promoted Ad -->
+    <% if (ad) { %>
+    <div class="ad-box">
+      <p class="ad-label">🔥 Featured Promotion</p>
+      <a href="<%= ad.url %>" target="_blank" rel="noopener noreferrer" class="ad-link">
+        <%= ad.title %>
+      </a>
+    </div>
+    <% } %>
+
+    <!-- Navigation -->
+    <div class="nav-links">
+      <a href="/promote" class="link">📢 Promote Your Link</a>
+      <a href="/admin" class="link">🔐 Admin Login</a>
+    </div>
+
+    <footer>
+      <small>⚡ Powered by Lightbringer | Instant Bitcoin Rewards</small>
+    </footer>
+  </div>
+
+  <!-- Google AdSense Script -->
+  <% if (adsenseClient) { %>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<%= adsenseClient %>"
+          crossorigin="anonymous"></script>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+  <% } %>
+
+  <!-- Claim Form Script -->
+  <script>
+    document.getElementById('claimForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const fpTo = document.getElementById('fp_to').value;
+      const resultEl = document.getElementById('result');
+      const submitBtn = e.target.querySelector('button');
+      
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Processing...';
+      resultEl.textContent = '';
+      
+      try {
+        const formData = new URLSearchParams();
+        formData.append('fp_to', fpTo);
+        
+        const response = await fetch('/claim', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        resultEl.textContent = data.message;
+        
+        // Add success/error class
+        if (data.message.includes('✅')) {
+          resultEl.className = 'result-message success';
+        } else {
+          resultEl.className = 'result-message error';
+        }
+      } catch (error) {
+        resultEl.textContent = '❌ Network error. Please try again.';
+        resultEl.className = 'result-message error';
+      } finally {
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🎁 Claim Reward';
+      }
+    });
+  </script>
+</body>
+</html>

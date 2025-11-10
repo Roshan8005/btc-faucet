@@ -1,0 +1,404 @@
+/* ===== Lightbringer Faucet Styles ===== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 100%);
+  color: #eeeeee;
+  text-align: center;
+  min-height: 100vh;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 480px;
+  margin: 40px auto;
+  background: linear-gradient(145deg, #111111 0%, #1a1a1a 100%);
+  padding: 32px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+              0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.container.dashboard {
+  max-width: 900px;
+}
+
+/* ===== Header ===== */
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffaa00 0%, #ff6600 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #ffaa00;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #aaaaaa;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+/* ===== AdSense Container ===== */
+.adsense-container {
+  margin: 24px 0;
+  padding: 16px;
+  background: #0a0a0a;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 170, 0, 0.1);
+  min-height: 100px;
+}
+
+/* ===== Claim Box ===== */
+.claim-box {
+  margin: 24px 0;
+  padding: 24px;
+  background: rgba(255, 170, 0, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+input[type="text"],
+input[type="url"],
+input[type="password"] {
+  width: 100%;
+  margin: 10px 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 170, 0, 0.3);
+  background: #0a0a0a;
+  color: #eeeeee;
+  font-size: 0.95rem;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #ffaa00;
+  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.1);
+}
+
+input::placeholder {
+  color: #666666;
+}
+
+button,
+.btn-claim {
+  width: 100%;
+  margin: 12px 0;
+  padding: 14px 20px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ffaa00 0%, #ff6600 100%);
+  color: #111111;
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3);
+}
+
+button:hover,
+.btn-claim:hover {
+  background: linear-gradient(135deg, #ffcc00 0%, #ff8800 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 170, 0, 0.4);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== Result Messages ===== */
+.result-message {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.result-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.result-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ===== Ad Box ===== */
+.ad-box {
+  background: linear-gradient(135deg, #1a1a1a 0%, #222222 100%);
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+.ad-label {
+  color: #ffaa00;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.ad-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  display: block;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.ad-link:hover {
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+}
+
+/* ===== Promo Info ===== */
+.promo-info {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.promo-info p {
+  color: #c4b5fd;
+  font-size: 0.9rem;
+  margin: 6px 0;
+}
+
+/* ===== Error Box ===== */
+.error-box {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-weight: 500;
+}
+
+/* ===== Navigation Links ===== */
+.nav-links {
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.link {
+  color: #ffaa00;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.link:hover {
+  background: rgba(255, 170, 0, 0.1);
+  text-decoration: underline;
+}
+
+.link-small {
+  color: #ffaa00;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.link-small:hover {
+  text-decoration: underline;
+}
+
+/* ===== Dashboard Stats ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #1a1a1a 0%, #222222 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 170, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(255, 170, 0, 0.2);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffaa00;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #aaaaaa;
+  font-weight: 500;
+}
+
+/* ===== Data Section ===== */
+.data-section {
+  margin: 32px 0;
+  text-align: left;
+}
+
+.data-section h3 {
+  color: #ffaa00;
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* ===== Table ===== */
+.table-container {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #0a0a0a;
+}
+
+thead {
+  background: linear-gradient(135deg, #1a1a1a 0%, #222222 100%);
+}
+
+th {
+  padding: 12px;
+  text-align: left;
+  color: #ffaa00;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 2px solid rgba(255, 170, 0, 0.3);
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #cccccc;
+  font-size: 0.85rem;
+}
+
+tr:hover {
+  background: rgba(255, 170, 0, 0.05);
+}
+
+.btn-delete {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  margin: 0;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.btn-delete:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+}
+
+/* ===== Footer ===== */
+footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+footer small {
+  color: #888888;
+  font-size: 0.85rem;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 600px) {
+  .container {
+    padding: 24px 16px;
+    margin: 20px auto;
+  }
+
+  header h1 {
+    font-size: 1.8rem;
+  }
+
+  header h2 {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  table {
+    font-size: 0.8rem;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container {
+  animation: fadeIn 0.5s ease;
+}
