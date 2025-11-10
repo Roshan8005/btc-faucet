@@ -10,7 +10,6 @@
   "author": "Roshan",
   "license": "MIT",
   "dependencies": {
-    "better-sqlite3": "^8.3.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",

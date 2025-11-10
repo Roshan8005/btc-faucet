@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
-const Database = require('better-sqlite3');
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -9,7 +9,6 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const app = express();
-const db = new Database(path.join(__dirname, 'lightbringer_faucet.db'));
 
 // Configuration
 const PORT = process.env.PORT || 5000;
@@ -25,30 +24,47 @@ const ADSENSE_CLIENT = process.env.ADSENSE_CLIENT || '';
 const ADSENSE_SLOT = process.env.ADSENSE_SLOT || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-this-secret-key';
 
-// Database setup
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    ip TEXT PRIMARY KEY,
-    last_claim INTEGER DEFAULT 0,
-    balance INTEGER DEFAULT 0,
-    total_claims INTEGER DEFAULT 0
-  );
-  CREATE TABLE IF NOT EXISTS payments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    time INTEGER,
-    ip TEXT,
-    to_address TEXT,
-    sat INTEGER,
-    response TEXT
-  );
-  CREATE TABLE IF NOT EXISTS ads (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT,
-    url TEXT,
-    time INTEGER,
-    active INTEGER DEFAULT 1
-  );
-`);
+// JSON file-based database
+const DATA_DIR = path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const PAYMENTS_FILE = path.join(DATA_DIR, 'payments.json');
+const ADS_FILE = path.join(DATA_DIR, 'ads.json');
+
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Initialize data files
+function initDataFile(filePath, defaultData) {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
+  }
+}
+
+initDataFile(USERS_FILE, { users: {} });
+initDataFile(PAYMENTS_FILE, { payments: [] });
+initDataFile(ADS_FILE, { ads: [] });
+
+// Database helper functions
+function readJSON(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (error) {
+    console.error(`Error reading ${filePath}:`, error);
+    return null;
+  }
+}
+
+function writeJSON(filePath, data) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    return true;
+  } catch (error) {
+    console.error(`Error writing ${filePath}:`, error);
+    return false;
+  }
+}
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -98,8 +114,9 @@ async function faucetpaySend(to, amountBtc) {
 // Routes
 app.get('/', (req, res) => {
   // Get random ad
-  const ads = db.prepare('SELECT * FROM ads WHERE active = 1 ORDER BY RANDOM() LIMIT 1').all();
-  const ad = ads.length > 0 ? ads[0] : null;
+  const adsData = readJSON(ADS_FILE);
+  const activeAds = adsData.ads.filter(ad => ad.active !== false);
+  const ad = activeAds.length > 0 ? activeAds[Math.floor(Math.random() * activeAds.length)] : null;
   
   res.render('index', {
     ad,
@@ -118,10 +135,12 @@ app.post('/claim', async (req, res) => {
     return res.json({ message: '❌ Please enter your FaucetPay username or wallet address.' });
   }
   
-  // Check user cooldown
-  const user = db.prepare('SELECT * FROM users WHERE ip = ?').get(ip);
+  // Read users data
+  const usersData = readJSON(USERS_FILE);
+  const user = usersData.users[ip];
   const currentTime = now();
   
+  // Check cooldown
   if (user && (currentTime - user.last_claim) < COOLDOWN) {
     const waitTime = COOLDOWN - (currentTime - user.last_claim);
     return res.json({ message: `⏳ Please wait ${waitTime} seconds before next claim.` });
@@ -131,18 +150,31 @@ app.post('/claim', async (req, res) => {
   const amountBtc = satoshiToBtc(REWARD_SAT);
   const paymentResult = await faucetpaySend(to, amountBtc);
   
-  // Update database
+  // Update user data
   if (user) {
-    db.prepare('UPDATE users SET last_claim = ?, balance = balance + ?, total_claims = total_claims + 1 WHERE ip = ?')
-      .run(currentTime, REWARD_SAT, ip);
+    user.last_claim = currentTime;
+    user.balance += REWARD_SAT;
+    user.total_claims += 1;
   } else {
-    db.prepare('INSERT INTO users (ip, last_claim, balance, total_claims) VALUES (?, ?, ?, 1)')
-      .run(ip, currentTime, REWARD_SAT);
+    usersData.users[ip] = {
+      last_claim: currentTime,
+      balance: REWARD_SAT,
+      total_claims: 1
+    };
   }
+  writeJSON(USERS_FILE, usersData);
   
   // Log payment
-  db.prepare('INSERT INTO payments (time, ip, to_address, sat, response) VALUES (?, ?, ?, ?, ?)')
-    .run(currentTime, ip, to, REWARD_SAT, JSON.stringify(paymentResult));
+  const paymentsData = readJSON(PAYMENTS_FILE);
+  paymentsData.payments.push({
+    id: paymentsData.payments.length + 1,
+    time: currentTime,
+    ip: ip,
+    to_address: to,
+    sat: REWARD_SAT,
+    response: JSON.stringify(paymentResult)
+  });
+  writeJSON(PAYMENTS_FILE, paymentsData);
   
   if (paymentResult.status === true || paymentResult.status === 'success') {
     return res.json({ message: `✅ Successfully sent ${REWARD_SAT} satoshi to ${to}!` });
@@ -172,8 +204,15 @@ app.post('/promote', (req, res) => {
   }
   
   // Insert ad
-  db.prepare('INSERT INTO ads (title, url, time) VALUES (?, ?, ?)')
-    .run(title, url, now());
+  const adsData = readJSON(ADS_FILE);
+  adsData.ads.push({
+    id: adsData.ads.length + 1,
+    title: title,
+    url: url,
+    time: now(),
+    active: true
+  });
+  writeJSON(ADS_FILE, adsData);
   
   res.json({ message: `✅ Ad submitted successfully: ${title}` });
 });
@@ -202,15 +241,19 @@ app.get('/dashboard', (req, res) => {
     return res.redirect('/admin');
   }
   
+  const usersData = readJSON(USERS_FILE);
+  const paymentsData = readJSON(PAYMENTS_FILE);
+  const adsData = readJSON(ADS_FILE);
+  
   const stats = {
-    users: db.prepare('SELECT COUNT(*) as count FROM users').get().count,
-    payments: db.prepare('SELECT COUNT(*) as count FROM payments').get().count,
-    ads: db.prepare('SELECT COUNT(*) as count FROM ads WHERE active = 1').get().count,
-    totalPaid: db.prepare('SELECT SUM(sat) as total FROM payments').get().total || 0
+    users: Object.keys(usersData.users).length,
+    payments: paymentsData.payments.length,
+    ads: adsData.ads.filter(ad => ad.active !== false).length,
+    totalPaid: paymentsData.payments.reduce((sum, p) => sum + p.sat, 0)
   };
   
-  const recentPayments = db.prepare('SELECT * FROM payments ORDER BY id DESC LIMIT 10').all();
-  const recentAds = db.prepare('SELECT * FROM ads ORDER BY id DESC LIMIT 10').all();
+  const recentPayments = paymentsData.payments.slice(-10).reverse();
+  const recentAds = adsData.ads.slice(-10).reverse();
   
   res.render('dashboard', {
     stats,
@@ -224,8 +267,17 @@ app.post('/admin/delete-ad/:id', (req, res) => {
     return res.status(403).json({ message: 'Unauthorized' });
   }
   
-  db.prepare('UPDATE ads SET active = 0 WHERE id = ?').run(req.params.id);
-  res.json({ message: 'Ad deleted successfully' });
+  const adsData = readJSON(ADS_FILE);
+  const adId = parseInt(req.params.id);
+  const ad = adsData.ads.find(a => a.id === adId);
+  
+  if (ad) {
+    ad.active = false;
+    writeJSON(ADS_FILE, adsData);
+    res.json({ message: 'Ad deleted successfully' });
+  } else {
+    res.status(404).json({ message: 'Ad not found' });
+  }
 });
 
 app.get('/logout', (req, res) => {
